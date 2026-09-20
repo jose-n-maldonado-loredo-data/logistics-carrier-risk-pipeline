@@ -1,2 +1,44 @@
-# logistics-carrier-risk-pipeline
-PostgreSQL to Power BI logistics analytics dashboard identifying $124K in delay penalty exposure and tracking high-risk carrier performance across 15,000 orders.
+# 🚚 Logistics Analytics & Carrier Risk Pipeline
+
+## 📌 Executive Summary
+An end-to-end data analytics solution bridging a local **PostgreSQL 18** database with an interactive **Power BI** executive dashboard. The pipeline isolates high-risk shipments, quantifies delay penalty exposure, and highlights operational cost leakage across delivery partners.
+
+---
+
+## 🎯 Key Business Findings
+* **Total Volume:** Analyzed **15,000** distinct customer orders across multi-regional distribution networks.
+* **Financial Risk:** Identified **$123.87K** in total estimated delay penalty exposure out of **$908.73K** in total logistics spend.
+* **High-Risk Exposure:** Flagged **746 High-Risk shipments** requiring immediate operational intervention.
+* **Carrier Performance:** Identified **Partner B** ($25.5K) and **Partner D** ($25.1K) as the primary drivers of delay penalty costs.
+
+---
+
+## 🛠️ Tech Stack & Architecture
+* **Database Management:** PostgreSQL 18 (Relational Data Modeling, Views, Joins, Aggregations)
+* **Business Intelligence:** Power BI Desktop (Import Mode, Data Modeling, DAX, KPI Cards, Bar & Donut Visuals)
+* **Connection:** Native PostgreSQL connector via `localhost:5432`
+
+---
+
+## 🗄️ Database Implementation (`v_executive_logistics_summary`)
+Data was extracted from raw logistics order tables and consolidated into an executive view using PostgreSQL:
+
+```sql
+CREATE OR REPLACE VIEW v_executive_logistics_summary AS
+SELECT 
+    o.order_id,
+    o.order_date,
+    o.customer_region,
+    o.warehouse_region,
+    o.product_category,
+    o.delivery_partner,
+    o.delivery_status,
+    o.order_value,
+    o.total_logistics_cost,
+    r.delay_risk_category,
+    CASE 
+        WHEN o.delivery_status IN ('Delayed', 'Severely Delayed') THEN 15
+        ELSE 0
+    END AS estimated_delay_penalty
+FROM logistics_orders o
+LEFT JOIN v_order_delay_risk r ON o.order_id = r.order_id;
