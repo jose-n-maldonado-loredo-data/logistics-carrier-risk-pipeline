@@ -23,8 +23,6 @@ An end-to-end data analytics solution bridging a local **PostgreSQL 18** databas
 ## 🗄️ Database Implementation (`v_executive_logistics_summary`)
 Data was extracted from raw logistics order tables and consolidated into an executive view using PostgreSQL:
 
-## 🧮 Explicit DAX Measures
-
 ```sql
 CREATE OR REPLACE VIEW v_executive_logistics_summary AS
 SELECT 
@@ -44,20 +42,3 @@ SELECT
     END AS estimated_delay_penalty
 FROM logistics_orders o
 LEFT JOIN v_order_delay_risk r ON o.order_id = r.order_id;
-
-```dax
-// Total Volume Measure
-Total Orders = COUNTROWS('public v_executive_logistics_summary')
-
-// Total Spend Aggregation
-Total Spend = SUM('public v_executive_logistics_summary'[total_logistics_cost])
-
-// Financial Risk Exposure
-Total Penalty Exposure = SUM('public v_executive_logistics_summary'[estimated_delay_penalty])
-
-// Filtered High-Risk Volume
-High Risk Orders = 
-CALCULATE(
-    COUNTROWS('public v_executive_logistics_summary'),
-    'public v_executive_logistics_summary'[delay_risk_category] = "High Risk"
-)
